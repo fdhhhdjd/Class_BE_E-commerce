@@ -1,5 +1,4 @@
 services:
-  # Postgres
   postgresql:
     container_name: postgresql
     image: postgres:latest
@@ -13,7 +12,6 @@ services:
     env_file:
       - .env
 
-  # Redis
   redis:
     container_name: redis
     image: redis:latest
