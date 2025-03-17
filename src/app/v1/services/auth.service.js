@@ -39,7 +39,7 @@ class AuthService {
 
     return {
       user: {
-        userId: newUser.id,
+        userId: newUser.user_id,
         email: newUser.email,
       },
       message: "User registered successfully",
@@ -79,7 +79,7 @@ class AuthService {
     // B5. Check Compare password
     const comparePassword = PasswordUtils.compare({
       password,
-      hash: user.password_hash,
+      hash: user.password,
     });
 
     // If user enter password incorrect
@@ -91,7 +91,7 @@ class AuthService {
     // B6. Create token
     const accessToken = TokenUtil.generateAccessToken({
       payload: {
-        userId: user.id,
+        userId: user.user_id,
         email: user.email,
       },
       secret: tokenConfig.AccessSecret,
@@ -99,7 +99,7 @@ class AuthService {
 
     const refreshToken = TokenUtil.generateRefreshToken({
       payload: {
-        userId: user.id,
+        userId: user.user_id,
         email: user.email,
       },
       secret: tokenConfig.RefreshSecret,
@@ -151,7 +151,7 @@ class AuthService {
     const hashPassword = PasswordUtils.hash({ password: newPassword });
 
     // B6. Update new password to database
-    UserModel.updatePassword({ id: user.id, password: hashPassword });
+    UserModel.updatePassword({ user_id: user.user_id, password: hashPassword });
 
     // B7. Send email new password
     EmailUtil.sendEmail({
@@ -230,7 +230,7 @@ class AuthService {
     // B4. Create token
     const accessToken = TokenUtil.generateAccessToken({
       payload: {
-        userId: user.id,
+        userId: user.user_id,
         email: user.email,
       },
       secret: tokenConfig.AccessSecret,
@@ -238,7 +238,7 @@ class AuthService {
 
     const refreshToken = TokenUtil.generateRefreshToken({
       payload: {
-        userId: user.id,
+        userId: user.user_id,
         email: user.email,
       },
       secret: tokenConfig.RefreshSecret,
@@ -258,5 +258,3 @@ class AuthService {
 }
 
 module.exports = new AuthService();
-
-// Server -> app -> routes -> controller -> service -> model -> database

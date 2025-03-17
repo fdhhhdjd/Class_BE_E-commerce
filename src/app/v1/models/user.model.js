@@ -4,7 +4,7 @@ class UserModel {
   async create({ email, password }) {
     try {
       const query =
-        "INSERT INTO users (email, password_hash) VALUES ($1, $2) RETURNING *";
+        "INSERT INTO users (email, password) VALUES ($1, $2) RETURNING *";
       const values = [email, password];
       const { rows } = await pgDatabase.query(query, values);
       return rows[0];
@@ -12,9 +12,10 @@ class UserModel {
       console.log("UserModel -> create -> error", error);
     }
   }
-  async getUser({ id }) {
-    const query = "SELECT * FROM users WHERE id = $1";
-    const values = [id];
+
+  async getUser({ user_id }) {
+    const query = "SELECT * FROM users WHERE user_id = $1";
+    const values = [user_id];
 
     const { rows } = await pgDatabase.query(query, values);
 
@@ -45,17 +46,17 @@ class UserModel {
     }
   }
 
-  async updatePassword({ id, password }) {
+  async updatePassword({ user_id, password }) {
     try {
-      const query = "UPDATE users SET password_hash = $1 WHERE id = $2";
-      const values = [password, id];
+      const query = "UPDATE users SET password = $1 WHERE user_id = $2";
+      const values = [password, user_id];
       await pgDatabase.query(query, values);
     } catch (error) {
       console.log("UserModel -> updatePassword -> error", error);
     }
   }
 
-  async updateUser({ id, username, fullname, avatar_url }) {
+  async updateUser({ user_id, username, fullname, avatar_url }) {
     try {
       const query = `
         UPDATE users
@@ -63,9 +64,9 @@ class UserModel {
           username = COALESCE($1, username),
           fullname = COALESCE($2, fullname),
           avatar_url = COALESCE($3, avatar_url)
-        WHERE id = $4
+        WHERE user_id = $4
       `;
-      const values = [username, fullname, avatar_url, id];
+      const values = [username, fullname, avatar_url, user_id];
       await pgDatabase.query(query, values);
     } catch (error) {
       console.log("UserModel -> updateUser -> error", error);
