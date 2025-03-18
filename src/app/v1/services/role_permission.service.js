@@ -38,7 +38,7 @@ class RolePermissionService {
 
   async removePermissionFromRole(req) {
     try {
-      const { roleId, permissionId } = req.body;
+      const { roleId, permissionId } = req.params;
       if (!roleId || !permissionId) {
         return "roleId and permissionId are required";
       }
