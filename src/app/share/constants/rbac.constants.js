@@ -4,6 +4,8 @@ const RBACConstants = {
     Create: "user.create",
     Update: "user.update",
     Delete: "user.delete",
+    UserRoleAssign: "user.role.assign",
+    UserRoleDelete: "user.role.delete",
   },
   Role: {
     View: "role.view",
@@ -11,6 +13,7 @@ const RBACConstants = {
     Update: "role.update",
     Delete: "role.delete",
     RoleAssign: "role.assign",
+    RoleDelete: "role.delete",
   },
   Permission: {
     View: "permission.view",

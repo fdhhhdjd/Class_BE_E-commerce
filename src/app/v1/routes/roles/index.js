@@ -40,16 +40,20 @@ router.delete(
 // Role Permission
 router.post(
   "/:roleId/permissions/:permissionId",
+  RBACMiddleware.checkPermission(RBACConstants.Role.RoleAssign),
   RolePermissionController.assignPermissionToRoleHandler
 );
 
 router.get(
   "/:roleId/permissions",
+  RBACMiddleware.checkPermission(RBACConstants.Role.View),
+
   RolePermissionController.getRolePermissionsHandler
 );
 
 router.delete(
   "/:roleId/permissions/:permissionId",
+  RBACMiddleware.checkPermission(RBACConstants.Role.RoleDelete),
   RolePermissionController.removePermissionFromRoleHandler
 );
 

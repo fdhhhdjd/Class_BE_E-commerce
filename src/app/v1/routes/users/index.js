@@ -15,7 +15,7 @@ router.post("/update", UserController.updateUser);
 //* User Role
 router.post(
   "/:userId/roles/:roleId",
-  RBACMiddleware.checkPermission(RBACConstants.Role.Create),
+  RBACMiddleware.checkPermission(RBACConstants.User.UserRoleAssign),
   UserRoleController.assignRoleToUserHandler
 );
 
@@ -28,7 +28,7 @@ router.get(
 
 router.delete(
   "/:userId/roles/:roleId",
-  RBACMiddleware.checkPermission(RBACConstants.Role.Delete),
+  RBACMiddleware.checkPermission(RBACConstants.User.UserRoleDelete),
   UserRoleController.removeRoleFromUserHandler
 );
 
