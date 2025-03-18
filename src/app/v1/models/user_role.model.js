@@ -1,3 +1,5 @@
+const pgDatabase = require("../../share/database/pg.database");
+
 class UserRoleModel {
   async assignRoleToUser(userId, roleId) {
     try {

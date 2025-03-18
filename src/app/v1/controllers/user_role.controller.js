@@ -1,3 +1,4 @@
+const userRoleService = require("../services/user_role.service");
 class UserRoleController {
   async assignRoleToUserHandler(req, res) {
     try {

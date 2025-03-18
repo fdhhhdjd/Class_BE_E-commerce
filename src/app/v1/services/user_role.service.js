@@ -29,7 +29,7 @@ class UserRoleService {
 
   async removeRoleFromUser(req) {
     try {
-      const { userId, roleId } = req.body;
+      const { userId, roleId } = req.params;
       if (!userId || !roleId) {
         return "userId and roleId are required";
       }

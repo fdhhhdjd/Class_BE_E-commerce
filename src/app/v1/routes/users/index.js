@@ -12,14 +12,14 @@ router.post("/update", UserController.updateUser);
 
 // User Role
 router.post(
-  "/users/:userId/roles/:roleId",
+  "/:userId/roles/:roleId",
   UserRoleController.assignRoleToUserHandler
 );
 
-router.get("/users/:userId/roles", UserRoleController.getUserRolesHandler);
+router.get("/:userId/roles", UserRoleController.getUserRolesHandler);
 
 router.delete(
-  "/users/:userId/roles/:roleId",
+  "/:userId/roles/:roleId",
   UserRoleController.removeRoleFromUserHandler
 );
 
