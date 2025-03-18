@@ -1,7 +1,10 @@
 const express = require("express");
 const RoleController = require("../../controllers/role.controller");
 const RolePermissionController = require("../../controllers/role_permission.controller");
+const AuthMiddleware = require("../../middlewares/auth.middleware");
 const router = express.Router();
+
+router.use(AuthMiddleware.checkToken);
 
 // Role
 router.get("/", RoleController.getRolesHandler);
