@@ -93,6 +93,8 @@ class AuthService {
       payload: {
         userId: user.user_id,
         email: user.email,
+        role: user.role_name,
+        roleId: user.role_id,
       },
       secret: tokenConfig.AccessSecret,
     });
@@ -101,6 +103,8 @@ class AuthService {
       payload: {
         userId: user.user_id,
         email: user.email,
+        role: user.role_name,
+        roleId: user.role_id,
       },
       secret: tokenConfig.RefreshSecret,
     });
@@ -114,6 +118,7 @@ class AuthService {
     return {
       message: "Login successfully",
       accessToken: accessToken,
+      role: user.role_name,
     };
   }
 

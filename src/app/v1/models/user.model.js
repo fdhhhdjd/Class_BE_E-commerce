@@ -24,8 +24,13 @@ class UserModel {
 
   async findOneByEmail({ email }) {
     try {
-      const query =
-        "SELECT * FROM users WHERE email = $1 AND is_deleted = false";
+      const query = `
+      SELECT u.*, r.role_id, r.role_name
+      FROM users u
+      LEFT JOIN user_roles ur ON u.user_id = ur.user_id
+      LEFT JOIN roles r ON ur.role_id = r.role_id
+      WHERE u.email = $1 AND u.is_deleted = false
+    `;
       const values = [email];
       const { rows } = await pgDatabase.query(query, values);
       return rows[0];
@@ -36,8 +41,13 @@ class UserModel {
 
   async findOneByUsername({ username }) {
     try {
-      const query =
-        "SELECT * FROM users WHERE username = $1 AND is_deleted = false";
+      const query = `
+        SELECT u.*, r.role_id, r.role_name
+        FROM users u
+        LEFT JOIN user_roles ur ON u.user_id = ur.user_id
+        LEFT JOIN roles r ON ur.role_id = r.role_id
+        WHERE u.username = $1 AND u.is_deleted = false
+      `;
       const values = [username];
       const { rows } = await pgDatabase.query(query, values);
       return rows[0];

@@ -4,6 +4,10 @@ const authConstants = {
     Username: 20,
   },
 
+  Role: {
+    User: "user",
+  },
+
   JwtTime: {
     AccessToken: "15m",
     RefreshToken: "7d",

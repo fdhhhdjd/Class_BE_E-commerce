@@ -53,16 +53,15 @@ class RolePermissionModel {
     }
   }
 
-  async getUserPermissions(userId) {
+  async getUserPermissions(roleId) {
     try {
       const query = `
-        SELECT p.permission_name 
-        FROM role_permissions rp
-        JOIN permissions p ON rp.permission_id = p.permission_id
-        JOIN user_roles ur ON ur.role_id = rp.role_id
-        WHERE ur.user_id = $1 AND p.is_deleted = FALSE
-      `;
-      const values = [userId];
+                    SELECT p.permission_name
+                    FROM role_permissions rp
+                    JOIN permissions p ON rp.permission_id = p.permission_id
+                    WHERE rp.role_id = $1;
+                `;
+      const values = [roleId];
       const { rows } = await pgDatabase.query(query, values);
       return rows.map((row) => row.permission_name);
     } catch (error) {

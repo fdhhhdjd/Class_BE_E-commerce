@@ -1,19 +1,26 @@
+const authConstants = require("../../share/constants/auth.constants");
 const rolePermissionModel = require("../models/role_permission.model");
 
 class RBACMiddleware {
   checkPermission(requiredPermission) {
     return async (req, res, next) => {
       try {
-        const { userId } = req.infoUserByToken;
+        const { roleId, role } = req.infoUserByToken;
 
-        if (!userId) {
+        if (!roleId || !role) {
           return res.status(401).send({
             message: "Unauthorized",
           });
         }
 
+        if (role === authConstants.Role.User) {
+          return res.status(403).send({
+            message: "Forbidden: Permission denied",
+          });
+        }
+
         const userPermissions = await rolePermissionModel.getUserPermissions(
-          userId
+          roleId
         );
 
         if (!userPermissions || userPermissions.length === 0) {
