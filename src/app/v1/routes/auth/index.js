@@ -11,11 +11,10 @@ router.post("/login-google", AuthController.loginGoogle);
 router.get("/logout", AuthController.logout);
 router.post("/forgot-password", AuthController.forgotPassword);
 
-// Google
-router.get(
-  "/auth/google",
-  passport.authenticate("google", { scope: ["profile", "email"] })
-);
+// Passport
+router.get("/google", AuthController.LoginGooglePassport);
+router.get("/logout", AuthController.logoutPassport);
+router.get("/profile", AuthController.getProfilePassport);
 
 router.use(AuthMiddleware.checkRefreshToken);
 router.get("/renew-token", AuthController.renewTokenByRefreshToken);

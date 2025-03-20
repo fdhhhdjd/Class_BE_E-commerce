@@ -1,5 +1,6 @@
 const passport = require("passport");
 const authConfig = require("../configs/auth.conf");
+const app = require("../../app");
 const GoogleStrategy = require("passport-google-oauth20").Strategy;
 
 passport.use(

@@ -5,7 +5,7 @@ const PasswordUtils = require("../../share/utils/password.util");
 const TokenUtil = require("../../share/utils/token.util");
 const AuthValidate = require("../../share/validates/auth.validate");
 const UserModel = require("../models/user.model");
-
+const passport = require("../../share/utils/passport.util");
 class AuthService {
   async register(body) {
     // B1 Get data from body
@@ -258,6 +258,42 @@ class AuthService {
     return {
       message: "Login Google successfully",
       accessToken: accessToken,
+    };
+  }
+
+  // Passport
+  loginSocialPassport(type) {
+    return (req, res, next) => {
+      passport.authenticate(type, {
+        scope: ["profile", "email"],
+        prompt: "select_account",
+      })(req, res, next);
+    };
+  }
+
+  logoutPassport(req, res, next) {
+    req.logout((err) => {
+      if (err) {
+        return next(err);
+      }
+
+      req.session.destroy((err) => {
+        if (err) {
+          console.error("Lỗi khi xóa session:", err);
+          return res.status(500).json({ message: "Logout Fail!" });
+        }
+        res.json({ message: "Logout successful!" });
+      });
+    });
+  }
+
+  getProfilePassport(req, res) {
+    if (!req.isAuthenticated()) {
+      return res.status(401).json({ message: "Unauthorized" });
+    }
+    return {
+      message: "Get profile successfully",
+      user: req.user,
     };
   }
 }

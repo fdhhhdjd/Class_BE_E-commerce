@@ -66,6 +66,32 @@ class AuthController {
       });
     }
   }
+  // Passport
+  LoginGooglePassport(req, res, next) {
+    return authService.loginSocialPassport("google")(req, res, next);
+  }
+
+  logoutPassport(req, res, next) {
+    try {
+      const result = authService.logoutPassport(req, res, next);
+      return res.status(200).json(result);
+    } catch (err) {
+      return res.status(500).send({
+        message: err.message,
+      });
+    }
+  }
+
+  getProfilePassport(req, res) {
+    try {
+      const result = authService.getProfilePassport(req, res);
+      return res.status(200).json(result);
+    } catch (err) {
+      return res.status(500).send({
+        message: err.message,
+      });
+    }
+  }
 }
 
 module.exports = new AuthController();
