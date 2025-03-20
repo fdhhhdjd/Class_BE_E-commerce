@@ -23,7 +23,7 @@
 
 ## Description
 
-This source code is used for teaching purposes every day. It is only used for class learning with teacher Tài.
+This source code opensource for everybody refer :D
 
 ## System Design
 
