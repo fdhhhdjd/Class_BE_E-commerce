@@ -8,27 +8,26 @@ const router = express.Router();
 
 router.use(AuthMiddleware.checkToken);
 
-//* User
+//* Users
 router.get("/profile", UserController.getUser);
 router.post("/update", UserController.updateUser);
 
-//* User Role
-router.post(
-  "/:userId/roles/:roleId",
-  RBACMiddleware.checkPermission(RBACConstants.User.UserRoleAssign),
-  UserRoleController.assignRoleToUserHandler
-);
-
+//* User Roles
 router.get(
   "/:userId/roles",
 
-  RBACMiddleware.checkPermission(RBACConstants.Role.View),
+  RBACMiddleware.checkPermission(RBACConstants.Role.Views),
   UserRoleController.getUserRolesHandler
+);
+router.post(
+  "/:userId/roles/:roleId",
+  RBACMiddleware.checkPermission(RBACConstants.User.Assign),
+  UserRoleController.assignRoleToUserHandler
 );
 
 router.delete(
   "/:userId/roles/:roleId",
-  RBACMiddleware.checkPermission(RBACConstants.User.UserRoleDelete),
+  RBACMiddleware.checkPermission(RBACConstants.User.Revoke),
   UserRoleController.removeRoleFromUserHandler
 );
 

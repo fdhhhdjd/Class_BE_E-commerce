@@ -9,7 +9,7 @@ router.use(AuthMiddleware.checkToken);
 
 router.get(
   "/",
-  RBACMiddleware.checkPermission(RBACConstants.Permission.View),
+  RBACMiddleware.checkPermission(RBACConstants.Permission.Views),
   PermissionController.getPermissionsHandler
 );
 router.get(

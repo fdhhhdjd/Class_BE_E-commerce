@@ -8,10 +8,10 @@ const router = express.Router();
 
 router.use(AuthMiddleware.checkToken);
 
-// Role
+//* Role
 router.get(
   "/",
-  RBACMiddleware.checkPermission(RBACConstants.Role.View),
+  RBACMiddleware.checkPermission(RBACConstants.Role.Views),
 
   RoleController.getRolesHandler
 );
@@ -37,24 +37,35 @@ router.delete(
   RoleController.deleteRoleHandler
 );
 
-// Role Permission
-router.post(
-  "/:roleId/permissions/:permissionId",
-  RBACMiddleware.checkPermission(RBACConstants.Role.RoleAssign),
-  RolePermissionController.assignPermissionToRoleHandler
-);
+//* Role Permission
 
 router.get(
   "/:roleId/permissions",
-  RBACMiddleware.checkPermission(RBACConstants.Role.View),
-
+  RBACMiddleware.checkPermission(RBACConstants.Role.Views),
   RolePermissionController.getRolePermissionsHandler
+);
+router.post(
+  "/:roleId/permissions/:permissionId",
+  RBACMiddleware.checkPermission(RBACConstants.Role.Assign),
+  RolePermissionController.assignPermissionToRoleHandler
+);
+
+router.post(
+  "/:roleId/permissions",
+  // RBACMiddleware.checkPermission(RBACConstants.Role.Assign),
+  RolePermissionController.assignPermissionToRoleBulkHandler
 );
 
 router.delete(
   "/:roleId/permissions/:permissionId",
-  RBACMiddleware.checkPermission(RBACConstants.Role.RoleDelete),
-  RolePermissionController.removePermissionFromRoleHandler
+  RBACMiddleware.checkPermission(RBACConstants.Role.Revoke),
+  RolePermissionController.revokePermissionFromRoleHandler
+);
+
+router.delete(
+  "/:roleId/permissions",
+  RBACMiddleware.checkPermission(RBACConstants.Role.Revoke),
+  RolePermissionController.revokePermissionFromRoleBulkHandler
 );
 
 module.exports = router;
