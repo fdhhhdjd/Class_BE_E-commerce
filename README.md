@@ -23,7 +23,7 @@
 
 ## Description
 
-This source code opensource for everybody refer :D
+This source code open source for everybody refer :D
 
 ## System Design
 
