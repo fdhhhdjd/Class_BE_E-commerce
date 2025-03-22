@@ -2,7 +2,10 @@ const permissionModel = require("../models/permission.model");
 
 class PermissionService {
   async getPermissions() {
-    return permissionModel.getPermissions();
+    return {
+      message: "Permissions found",
+      data: await permissionModel.getPermissions(),
+    };
   }
 
   async getPermissionById(req) {
@@ -12,9 +15,12 @@ class PermissionService {
       throw new Error("Permission ID is required");
     }
 
-    const permission = await permissionModel.permissionModel(permissionId);
+    const result = await permissionModel.permissionModel(permissionId);
 
-    return permission;
+    return {
+      message: "Permission found",
+      data: result,
+    };
   }
 
   async createPermission(req) {
@@ -24,15 +30,14 @@ class PermissionService {
       throw new Error("Permission name and description are required");
     }
 
-    const permission = await permissionModel.createPermission(
+    const result = await permissionModel.createPermission(
       permissionName,
       description
     );
 
     return {
       message: "Permission created successfully",
-      permission: permission.permission_name,
-      description: permission.description,
+      data: result,
     };
   }
 
@@ -43,7 +48,7 @@ class PermissionService {
       throw new Error("Permission ID is required");
     }
 
-    const permission = await permissionModel.updatePermission(
+    const result = await permissionModel.updatePermission(
       permissionId,
       permissionName,
       description
@@ -51,8 +56,7 @@ class PermissionService {
 
     return {
       message: "Permission updated successfully",
-      permission: permission.permission_name,
-      description: permission.description,
+      data: result,
     };
   }
 
@@ -63,12 +67,11 @@ class PermissionService {
       throw new Error("Permission ID is required");
     }
 
-    const permission = await permissionModel.deletePermission(permissionId);
+    const result = await permissionModel.deletePermission(permissionId);
 
     return {
       message: "Permission deleted successfully",
-      permission: permission.permission_name,
-      description: permission.description,
+      data: result,
     };
   }
 }

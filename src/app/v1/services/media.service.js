@@ -9,7 +9,10 @@ class MediaService {
 
     const media = await cloudinary.api.resource(publicId);
 
-    return media;
+    return {
+      message: "Media found",
+      data: media,
+    };
   }
 
   async uploadSingle(req) {
@@ -27,8 +30,11 @@ class MediaService {
     });
 
     return {
-      publicId: result.public_id,
-      url: result.secure_url,
+      message: "Upload success",
+      data: {
+        publicId: result.public_id,
+        url: result.secure_url,
+      },
     };
   }
 
@@ -61,7 +67,10 @@ class MediaService {
     });
 
     const results = await Promise.all(uploadPromises);
-    return results;
+    return {
+      message: "Upload success",
+      data: results,
+    };
   }
 
   async deleteSingle(publicId) {
@@ -98,7 +107,10 @@ class MediaService {
     });
 
     const results = await Promise.all(deletePromises);
-    return results;
+    return {
+      message: "Delete success",
+      data: results,
+    };
   }
 }
 

@@ -59,7 +59,6 @@ class RolePermissionModel {
   }
 
   async softDeletePermissionsFromRoleBulk(roleId, permissionIds) {
-    console.log(roleId);
     try {
       const query = `
         UPDATE role_permissions

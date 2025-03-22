@@ -8,7 +8,11 @@ class UserRoleService {
         return "userId and roleId are required";
       }
 
-      return await userRoleModel.assignRoleToUser(userId, roleId);
+      const result = await userRoleModel.assignRoleToUser(userId, roleId);
+      return {
+        message: "Role assigned to user successfully",
+        data: result,
+      };
     } catch (error) {
       console.log("UserRoleService -> assignRoleToUser -> error", error);
     }
@@ -21,7 +25,11 @@ class UserRoleService {
         return "userId is required";
       }
 
-      return await userRoleModel.getUserRoles(userId);
+      const result = await userRoleModel.getUserRoles(userId);
+      return {
+        message: "User roles found",
+        data: result,
+      };
     } catch (error) {
       console.log("UserRoleService -> getUserRoles -> error", error);
     }
@@ -33,8 +41,11 @@ class UserRoleService {
       if (!userId || !roleId) {
         return "userId and roleId are required";
       }
-
-      return await userRoleModel.removeRoleFromUser(userId, roleId);
+      const result = await userRoleModel.removeRoleFromUser(userId, roleId);
+      return {
+        message: "Role removed from user successfully",
+        data: result,
+      };
     } catch (error) {
       console.log("UserRoleService -> removeRoleFromUser -> error", error);
     }

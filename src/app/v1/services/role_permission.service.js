@@ -7,8 +7,11 @@ class RolePermissionService {
       if (!roleId) {
         return "roleId is required";
       }
-
-      return await rolePermissionModel.getRolePermissions(roleId);
+      const result = await rolePermissionModel.getRolePermissions(roleId);
+      return {
+        message: "Role permissions found",
+        data: result,
+      };
     } catch (error) {
       console.log(
         "RolePermissionService -> getRolePermissions -> error",
@@ -23,11 +26,14 @@ class RolePermissionService {
       if (!roleId || !permissionId) {
         return "roleId and permissionId are required";
       }
-
-      return await rolePermissionModel.assignPermissionToRole(
+      const result = await rolePermissionModel.assignPermissionToRole(
         roleId,
         permissionId
       );
+      return {
+        message: "Permission assigned to role successfully",
+        data: result,
+      };
     } catch (error) {
       console.log(
         "RolePermissionService -> assignPermissionToRole -> error",
@@ -41,16 +47,18 @@ class RolePermissionService {
       const { roleId } = req.params;
       const { permissionIds } = req.body;
 
-      console.log(permissionIds);
-
       if (!roleId || !permissionIds) {
         return "roleId and permissionIds are required";
       }
-
-      return await rolePermissionModel.softDeletePermissionsFromRoleBulk(
-        roleId,
-        permissionIds
-      );
+      const result =
+        await rolePermissionModel.softDeletePermissionsFromRoleBulk(
+          roleId,
+          permissionIds
+        );
+      return {
+        message: "Permissions assigned to role successfully",
+        data: result,
+      };
     } catch (error) {
       console.log(
         "RolePermissionService -> assignPermissionToRoleBulk -> error",
@@ -66,10 +74,14 @@ class RolePermissionService {
         return "roleId and permissionId are required";
       }
 
-      return await rolePermissionModel.removePermissionFromRole(
+      const result = await rolePermissionModel.removePermissionFromRole(
         roleId,
         permissionId
       );
+      return {
+        message: "Permission removed from role successfully",
+        data: result,
+      };
     } catch (error) {
       console.log(
         "RolePermissionService -> removePermissionFromRole -> error",
@@ -87,10 +99,16 @@ class RolePermissionService {
         return "roleId and permissionIds are required";
       }
 
-      return await rolePermissionModel.softDeletePermissionsFromRoleBulk(
-        roleId,
-        permissionIds
-      );
+      const result =
+        await rolePermissionModel.softDeletePermissionsFromRoleBulk(
+          roleId,
+          permissionIds
+        );
+
+      return {
+        message: "Permissions removed from role successfully",
+        data: result,
+      };
     } catch (error) {
       console.log(
         "RolePermissionService -> softDeletePermissionsFromRoleBulk -> error",

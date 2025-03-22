@@ -2,7 +2,11 @@ const roleModel = require("../models/role.model");
 
 class RoleService {
   async getRolesHandler() {
-    return roleModel.getRoles();
+    const roles = roleModel.getRoles();
+    return {
+      message: "Roles found",
+      data: roles,
+    };
   }
 
   async getRoleHandler(req, res) {
@@ -13,7 +17,10 @@ class RoleService {
 
     const role = await roleModel.getRoleById(roleId);
 
-    return role;
+    return {
+      message: "Role found",
+      data: role,
+    };
   }
 
   async createRoleHandler(req) {
@@ -26,8 +33,7 @@ class RoleService {
 
     return {
       message: "Role created successfully",
-      role: role.role_name,
-      description: role.description,
+      data: role,
     };
   }
 
@@ -41,8 +47,7 @@ class RoleService {
 
     return {
       message: "Role updated successfully",
-      role: role.role_name,
-      description: role.description,
+      data: role,
     };
   }
   async deleteRoleHandler(req) {
@@ -55,8 +60,7 @@ class RoleService {
 
     return {
       message: "Role deleted successfully",
-      role: role.role_name,
-      description: role.description,
+      data: role,
     };
   }
 }
