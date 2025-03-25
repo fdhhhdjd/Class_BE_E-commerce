@@ -3,25 +3,103 @@ const pgDatabase = require("../../share/database/pg.database");
 class AccountModel {
   async getAccounts() {
     try {
-      const query =
-        "SELECT * FROM users WHERE is_deleted = FALSE AND is_blocked = FALSE";
+      const query = `
+        SELECT 
+          u.user_id, 
+          u.username, 
+          u.email, 
+          u.full_name,
+          u.avatar_url,
+          u.phone_number,
+          u.address,
+          u.is_blocked,
+          u.last_login,
+          r.role_id, 
+          r.role_name
+        FROM users u
+        JOIN user_roles ur ON u.user_id = ur.user_id
+        JOIN roles r ON ur.role_id = r.role_id
+        WHERE u.is_deleted = FALSE 
+          AND u.is_blocked = FALSE
+          AND r.role_name != 'user'
+      `;
+
       const { rows } = await pgDatabase.query(query);
-      return rows;
+
+      const accounts = rows.map((row) => ({
+        user_id: row.user_id,
+        username: row.username,
+        email: row.email,
+        full_name: row.full_name,
+        avatar_url: row.avatar_url,
+        phone_number: row.phone_number,
+        address: row.address,
+        is_blocked: row.is_blocked,
+        last_login: row.last_login,
+        role: {
+          role_id: row.role_id,
+          role_name: row.role_name,
+        },
+      }));
+
+      return { users: accounts };
     } catch (error) {
-      console.log("AccountModel -> getAccounts -> error", error);
+      console.error("AccountModel -> getAccounts -> error", error);
       throw error;
     }
   }
 
   async getAccountById(id) {
     try {
-      const query =
-        "SELECT * FROM users WHERE user_id = $1 AND is_deleted = FALSE AND is_blocked = FALSE";
+      const query = `
+        SELECT 
+          u.user_id, 
+          u.username, 
+          u.email, 
+          r.role_id, 
+          r.role_name, 
+          p.permission_id, 
+          p.permission_name
+        FROM users u
+        JOIN user_roles ur ON u.user_id = ur.user_id
+        JOIN roles r ON ur.role_id = r.role_id
+        LEFT JOIN role_permissions rp ON r.role_id = rp.role_id
+        LEFT JOIN permissions p ON rp.permission_id = p.permission_id
+        WHERE u.user_id = $1 
+          AND u.is_deleted = FALSE 
+          AND u.is_blocked = FALSE
+          AND r.role_name != 'user'
+      `;
+
       const values = [id];
       const { rows } = await pgDatabase.query(query, values);
-      return rows || {};
+
+      if (rows.length === 0) return null;
+
+      const userData = {
+        user_id: rows[0].user_id,
+        username: rows[0].username,
+        email: rows[0].email,
+        role: {
+          role_id: rows[0].role_id,
+          role_name: rows[0].role_name,
+        },
+        permissions: [],
+      };
+
+      // Thêm các quyền vào mảng permissions
+      rows.forEach((row) => {
+        if (row.permission_id) {
+          userData.permissions.push({
+            permission_id: row.permission_id,
+            permission_name: row.permission_name,
+          });
+        }
+      });
+
+      return { user: userData };
     } catch (error) {
-      console.log("AccountModel -> getAccountById -> error", error);
+      console.error("AccountModel -> getAccountById -> error", error);
       throw error;
     }
   }
