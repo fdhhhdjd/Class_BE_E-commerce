@@ -49,9 +49,8 @@ class RolePermissionController {
 
   async revokePermissionFromRoleBulkHandler(req, res) {
     try {
-      const result = await rolePermissionService.assignPermissionToRoleBulk(
-        req
-      );
+      const result =
+        await rolePermissionService.softDeletePermissionsFromRoleBulk(req);
       return res.status(200).json(result);
     } catch (err) {
       return res.status(500).send({

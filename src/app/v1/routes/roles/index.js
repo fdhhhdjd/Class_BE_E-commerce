@@ -52,7 +52,7 @@ router.post(
 
 router.post(
   "/:roleId/permissions",
-  // RBACMiddleware.checkPermission(RBACConstants.Role.Assign),
+  RBACMiddleware.checkPermission(RBACConstants.Role.Assign),
   RolePermissionController.assignPermissionToRoleBulkHandler
 );
 

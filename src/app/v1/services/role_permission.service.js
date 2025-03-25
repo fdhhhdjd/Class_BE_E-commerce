@@ -50,11 +50,10 @@ class RolePermissionService {
       if (!roleId || !permissionIds) {
         return "roleId and permissionIds are required";
       }
-      const result =
-        await rolePermissionModel.softDeletePermissionsFromRoleBulk(
-          roleId,
-          permissionIds
-        );
+      const result = await rolePermissionModel.assignPermissionToRoleBulk(
+        roleId,
+        permissionIds
+      );
       return {
         message: "Permissions assigned to role successfully",
         data: result,
