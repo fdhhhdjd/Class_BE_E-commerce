@@ -10,9 +10,7 @@ const authConfig = require("./share/configs/auth.conf");
 const app = express();
 app.use(cors());
 app.use(express.json());
-
 app.use(morgan("dev"));
-
 app.use(cookieParser());
 app.use(
   session({
