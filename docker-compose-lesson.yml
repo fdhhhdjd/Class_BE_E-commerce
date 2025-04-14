@@ -1,0 +1,13 @@
+version: "3.8"
+services:
+  nginx:
+    image: nginx:latest
+    container_name: nginx
+    restart: unless-stopped
+    ports:
+      - "80:80"
+    volumes:
+      - ./nginx/dist:/usr/share/nginx/html # Mount static files
+      - ./nginx/conf.d:/etc/nginx/conf.d
+    environment:
+      - TZ=Asia/Ho_Chi_Minh # Set timezone

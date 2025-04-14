@@ -27,6 +27,18 @@ db-import:
 	@echo "Importing database..."
 	cat ./database/data/dump.sql | docker exec -i $(POSTGRES_HOST_CONTAINER) psql -U $(POSTGRES_USER) -d $(POSTGRES_DB)
 
+# PM2
+
+pm2-start:
+	pm2 start ecosystem.config.js
+
+pm2-delete:
+	pm2 delete e-commerce-be
+
+pm2-deploy:
+	git pull 
+	make pm2-delete
+	make pm2-start
 
 
 
