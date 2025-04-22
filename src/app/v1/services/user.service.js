@@ -9,10 +9,11 @@ class UserService {
 
     // If cache miss then get data from database
     if (!user || Object.keys(user).length === 0) {
-      user = await userModel.getUser({ id: userId });
+      user = await userModel.getUser({ user_id: userId });
 
       // Set Cache to Redis
-      await redisDB.executeCommand("hmset", `user:${userId}`, user);
+      const flatUser = Object.entries(user).flat();
+      await redisDB.executeCommand("hmset", `user:${userId}`, ...flatUser);
     }
 
     // const user = await userModel.getUser({ id: userId });
@@ -24,39 +25,24 @@ class UserService {
 
   async updateUser(req) {
     // B1. Get data from body
-    const { username, fullname, avatar_url } = req.body;
+    const data = req.body;
 
     // B2. Get userId from token
     const { userId } = req.infoUserByToken;
 
-    // B3. Get userId from token
-    const user = await userModel.getUser({ id: userId });
+    // B3. Check user existence
+    const user = await userModel.getUser({ user_id: userId });
+    if (!user) throw new Error("User not found");
 
-    // B4. Check user exist
-    if (!user) {
-      throw new Error("User not found");
-    }
+    // B4. Update database (chỉ cập nhật các trường có trong data)
+    await userModel.updateUser({ user_id: userId, ...data });
 
-    if (username) {
-      user.username = username;
-    }
-    if (fullname) {
-      user.fullname = fullname;
-    }
-    if (avatar_url) {
-      user.avatar_url = avatar_url;
-    }
+    // B5. Lấy lại dữ liệu mới sau update
+    const updatedUser = await userModel.getUser({ user_id: userId });
 
-    // Update database
-    await userModel.updateUser({
-      id: userId,
-      username: user.username,
-      fullname: user.fullname,
-      avatar_url: user.avatar_url,
-    });
-
-    // Update cache
-    await redisDB.executeCommand("hmset", `user:${userId}`, user);
+    // B6. Update Redis cache
+    const flatUser = Object.entries(updatedUser).flat();
+    await redisDB.executeCommand("hset", `user:${userId}`, ...flatUser);
   }
 }
 

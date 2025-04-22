@@ -14,12 +14,23 @@ class UserModel {
   }
 
   async getUser({ user_id }) {
-    const query = "SELECT * FROM users WHERE user_id = $1";
-    const values = [user_id];
+    try {
+      const query = `
+        SELECT u.*, r.role_id, r.role_name
+        FROM users u
+        LEFT JOIN user_roles ur ON u.user_id = ur.user_id
+        LEFT JOIN roles r ON ur.role_id = r.role_id
+        WHERE u.user_id = $1 AND u.is_deleted = false
+      `;
+      const values = [user_id];
 
-    const { rows } = await pgDatabase.query(query, values);
+      const { rows } = await pgDatabase.query(query, values);
 
-    return rows[0];
+      return rows[0];
+    } catch (error) {
+      console.log("UserModel -> getUser -> error", error);
+      return null;
+    }
   }
 
   async findOneByEmail({ email }) {
@@ -66,17 +77,30 @@ class UserModel {
     }
   }
 
-  async updateUser({ user_id, username, fullname, avatar_url }) {
+  async updateUser({ user_id, ...data }) {
     try {
+      // Lọc ra các cặp key-value hợp lệ (loại bỏ undefined/null)
+      const fields = Object.entries(data).filter(
+        ([_, value]) => value !== undefined && value !== null
+      );
+
+      if (fields.length === 0) return; // Không có gì để update
+
+      // Tạo các đoạn field = COALESCE($1, field)
+      const setClause = fields
+        .map(([key], idx) => `${key} = COALESCE($${idx + 1}, ${key})`)
+        .join(", ");
+
+      // Giá trị tương ứng
+      const values = fields.map(([_, value]) => value);
+      values.push(user_id); // Cuối cùng là user_id
+
       const query = `
         UPDATE users
-        SET 
-          username = COALESCE($1, username),
-          fullname = COALESCE($2, fullname),
-          avatar_url = COALESCE($3, avatar_url)
-        WHERE user_id = $4
+        SET ${setClause}, updated_at = CURRENT_TIMESTAMP
+        WHERE user_id = $${values.length}
       `;
-      const values = [username, fullname, avatar_url, user_id];
+
       await pgDatabase.query(query, values);
     } catch (error) {
       console.log("UserModel -> updateUser -> error", error);

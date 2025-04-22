@@ -16,23 +16,15 @@ class AuthMiddleware {
       });
     }
 
-    // B3. Check Cookie have refresh token
-    const refreshToken = req.cookies[authConstants.KeyCookie.RefreshToken];
-
-    // B4. Check refresh token
-    if (!refreshToken) {
-      return res.status(401).send({
-        message: "Unauthorized",
-      });
-    }
-
     // B5. Verify access token
     try {
       const infoUserByToken = TokenUtil.verifyToken({
         token: accessToken,
         secret: tokenConfig.AccessSecret,
       });
+
       req.infoUserByToken = infoUserByToken;
+
       next();
     } catch (error) {
       // B6. Check error token ( Signature, Expired,... )

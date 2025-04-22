@@ -40,5 +40,10 @@ pm2-deploy:
 	make pm2-delete
 	make pm2-start
 
+# Password
+run-script:
+	docker exec -it nginx chmod +x /usr/local/bin/scripts/htpasswd.sh
+
+
 
 

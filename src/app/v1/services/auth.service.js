@@ -111,8 +111,10 @@ class AuthService {
 
     res.cookie(authConstants.KeyCookie.RefreshToken, refreshToken, {
       httpOnly: true,
-      secure: false,
-      sameSite: "none",
+      secure: true, // Bắt buộc nếu dùng SameSite=None
+      sameSite: "none", // Cho phép cross-site
+      domain: "localhost", // Thay bằng domain của bạn (hoặc "localhost" cho dev)
+      maxAge: 7 * 24 * 60 * 60 * 1000,
     });
 
     return {
