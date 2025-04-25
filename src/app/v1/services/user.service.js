@@ -4,21 +4,32 @@ class UserService {
   async getUser(req) {
     const { userId } = req.infoUserByToken;
 
-    // Get Cache from Redis (Cache Hit)
+    // 1. Get Cache
     let user = await redisDB.executeCommand("hgetall", `user:${userId}`);
 
-    // If cache miss then get data from database
-    if (!user || Object.keys(user).length === 0) {
+    // Convert flat Redis hash (string values) to object
+    if (user && Object.keys(user).length > 0) {
+      // Redis returns all values as strings, convert appropriately if needed
+      Object.keys(user).forEach((key) => {
+        if (user[key] === "true") user[key] = true;
+        else if (user[key] === "false") user[key] = false;
+      });
+    } else {
+      // 2. Cache Miss → DB
       user = await userModel.getUser({ user_id: userId });
 
-      // Set Cache to Redis
+      if (!user) throw new Error("User not found");
+
       const flatUser = Object.entries(user).flat();
       await redisDB.executeCommand("hmset", `user:${userId}`, ...flatUser);
     }
 
-    // const user = await userModel.getUser({ id: userId });
+    // 3. Always get role & permissions from DB
+    const role = await userModel.getRoleWithPermissionsByUserId(userId);
+
+    // 4. Return full response
     return {
-      user: user ? user : [],
+      user: { ...user, role },
       message: "User found successfully",
     };
   }

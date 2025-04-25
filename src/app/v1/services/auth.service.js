@@ -6,6 +6,7 @@ const TokenUtil = require("../../share/utils/token.util");
 const AuthValidate = require("../../share/validates/auth.validate");
 const UserModel = require("../models/user.model");
 const passport = require("../../share/utils/passport.util");
+const redisDB = require("../../share/database/redis.database");
 class AuthService {
   async register(body) {
     // B1 Get data from body
@@ -87,6 +88,21 @@ class AuthService {
       throw new Error("Password is incorrect");
     }
 
+    // Update last login
+    await UserModel.updateUser({
+      user_id: user.user_id,
+      last_login: new Date(),
+    });
+    // B2. Get latest user info (without role if you separate it in SQL or manually)
+    const updatedUser = await UserModel.getUser({ user_id: user.user_id });
+
+    // B3. Remove role from cache data before saving (just user fields)
+    const { role_id, role_name, permissions, ...userCacheData } = updatedUser; // destructure to exclude role
+
+    // B4. Flatten user object and update cache
+    const flatUser = Object.entries(userCacheData).flat();
+    await redisDB.executeCommand("hset", `user:${user.user_id}`, ...flatUser);
+
     // If user enter password correct
     // B6. Create token
     const accessToken = TokenUtil.generateAccessToken({
@@ -120,6 +136,7 @@ class AuthService {
     return {
       message: "Login successfully",
       accessToken: accessToken,
+      user_id: user.user_id,
       role: user.role_name,
     };
   }

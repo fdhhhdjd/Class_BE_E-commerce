@@ -13,22 +13,37 @@ class UserModel {
     }
   }
 
+  async getRoleWithPermissionsByUserId(user_id) {
+    const query = `
+      SELECT 
+        r.role_id, 
+        r.role_name,
+        COALESCE(json_agg(DISTINCT jsonb_build_object(
+          'permission_id', p.permission_id,
+          'permission_name', p.permission_name,
+          'description', p.description
+        )) FILTER (WHERE p.permission_id IS NOT NULL), '[]') AS permissions
+      FROM user_roles ur
+      JOIN roles r ON ur.role_id = r.role_id
+      LEFT JOIN role_permissions rp ON r.role_id = rp.role_id AND rp.is_deleted = false
+      LEFT JOIN permissions p ON rp.permission_id = p.permission_id AND p.is_deleted = false
+      WHERE ur.user_id = $1
+      GROUP BY r.role_id
+    `;
+    const { rows } = await pgDatabase.query(query, [user_id]);
+    return rows[0];
+  }
+
   async getUser({ user_id }) {
     try {
       const query = `
-        SELECT u.*, r.role_id, r.role_name
-        FROM users u
-        LEFT JOIN user_roles ur ON u.user_id = ur.user_id
-        LEFT JOIN roles r ON ur.role_id = r.role_id
-        WHERE u.user_id = $1 AND u.is_deleted = false
+        SELECT * FROM users WHERE user_id = $1 AND is_deleted = false
       `;
       const values = [user_id];
-
       const { rows } = await pgDatabase.query(query, values);
-
       return rows[0];
     } catch (error) {
-      console.log("UserModel -> getUser -> error", error);
+      console.log("UserModel -> getUserBasic -> error", error);
       return null;
     }
   }
