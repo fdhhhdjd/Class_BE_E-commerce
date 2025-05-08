@@ -12,6 +12,7 @@ router.get(
   RBACMiddleware.checkPermission(RBACConstants.User.Views),
   AccountController.getAccounts
 );
+
 router.get(
   "/:id",
   RBACMiddleware.checkPermission(RBACConstants.User.View),

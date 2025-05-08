@@ -3,9 +3,12 @@ const morgan = require("morgan");
 const cors = require("cors");
 const cookieParser = require("cookie-parser");
 const session = require("express-session");
+const swaggerUi = require("swagger-ui-express");
+
 const appConfig = require("./share/configs/app.conf");
 const passport = require("./share/utils/passport.util");
 const authConfig = require("./share/configs/auth.conf");
+const swaggerSpec = require("./share/configs/swagger.conf");
 
 const app = express();
 app.use(cors());
@@ -33,6 +36,9 @@ app.get(
     res.redirect("/api/auth/profile");
   }
 );
+
+// Swagger UI route
+app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerSpec));
 
 // Routes for all api
 app.use("/api", require("./v1/routes"));
