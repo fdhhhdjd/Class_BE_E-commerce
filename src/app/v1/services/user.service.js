@@ -1,5 +1,6 @@
 const userModel = require("../models/user.model");
 const redisDB = require("../../share/database/redis.database");
+const PasswordUtils = require("../../share/utils/password.util");
 class UserService {
   async getUser(req) {
     const { userId } = req.infoUserByToken;
@@ -54,6 +55,47 @@ class UserService {
     // B6. Update Redis cache
     const flatUser = Object.entries(updatedUser).flat();
     await redisDB.executeCommand("hset", `user:${userId}`, ...flatUser);
+
+    return {
+      message: "User updated successfully",
+    };
+  }
+
+  async updatePassword(req) {
+    // B1. Get data from body
+    const { oldPassword, newPassword } = req.body;
+
+    // B2. Get userId from token
+    const { userId } = req.infoUserByToken;
+
+    // B3. Check user exit
+    const user = await userModel.getUser({ user_id: userId });
+    if (!user) throw new Error("User not found");
+
+    // B4. Check old password is correct
+    const comparePassword = PasswordUtils.compare({
+      password: oldPassword,
+      hash: user.password,
+    });
+
+    // B5. If user enter password incorrect
+    if (!comparePassword) {
+      throw new Error("Old Password is incorrect");
+    }
+
+    // B6. Hash new password
+    const hashPassword = PasswordUtils.hash({ password: newPassword });
+    const data = { password: hashPassword };
+
+    // B7. Update database (chỉ cập nhật các trường có trong data)
+    await userModel.updateUser({ user_id: userId, ...data });
+
+    const flatUser = Object.entries(data).flat();
+    await redisDB.executeCommand("hset", `user:${userId}`, ...flatUser);
+
+    return {
+      message: "Password updated successfully",
+    };
   }
 }
 

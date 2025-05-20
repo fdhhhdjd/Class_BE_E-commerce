@@ -116,6 +116,51 @@ class UserController {
       });
     }
   }
+
+  /**
+   * @swagger
+   * /api/user/update-password:
+   *   post:
+   *     summary: Cập nhật mật khẩu người dùng
+   *     tags:
+   *       - Users
+   *     requestBody:
+   *       required: true
+   *       content:
+   *         application/json:
+   *           schema:
+   *             type: object
+   *             properties:
+   *               oldPassword:
+   *                 type: string
+   *                 example: "oldpassword123"
+   *               newPassword:
+   *                 type: string
+   *                 example: "newpassword123"
+   *     responses:
+   *       200:
+   *         description: Thành công
+   *         content:
+   *           application/json:
+   *             schema:
+   *               type: object
+   *               properties:
+   *                 message:
+   *                   type: string
+   *                   example: "Password updated successfully"
+   */
+  async updatePassword(req, res) {
+    try {
+      await userService.updatePassword(req);
+      return res.status(200).send({
+        message: "Password updated successfully",
+      });
+    } catch (err) {
+      return res.status(500).send({
+        message: err.message,
+      });
+    }
+  }
 }
 
 module.exports = new UserController();

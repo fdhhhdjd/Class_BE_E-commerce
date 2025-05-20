@@ -8,6 +8,11 @@ const authConstants = {
     User: "user",
   },
 
+  Type: {
+    Identify: 0,
+    Social: 1,
+  },
+
   JwtTime: {
     AccessToken: "15m",
     RefreshToken: "7d",

@@ -11,6 +11,7 @@ router.use(AuthMiddleware.checkToken);
 //* Users
 router.get("/profile", UserController.getUser);
 router.post("/update", UserController.updateUser);
+router.post("/update-password", UserController.updatePassword);
 
 //* User Roles
 // router.get(

@@ -141,6 +141,169 @@ class AuthService {
     };
   }
 
+  async loginAdmin(body, res) {
+    // B1 Get data from body
+    const { identify, password, type } = body;
+
+    if (Number(type) === authConstants.Type.Identify) {
+      // B2. Check type login
+      const checkTypeLogin = AuthValidate.checkTypeLogin(identify);
+
+      // B3. Check Validate
+      let user;
+      if (checkTypeLogin === authConstants.LoginType.Email) {
+        const checkEmail = AuthValidate.isEmailValid(identify);
+        if (!checkEmail) {
+          throw new Error("Invalid email");
+        }
+        // B4. Check email exist or not exist
+        user = await UserModel.findOneByEmail({ email: identify });
+      } else if (checkTypeLogin === authConstants.LoginType.Username) {
+        const checkUsername = AuthValidate.isUsernameValid(identify);
+        if (checkUsername) {
+          throw new Error("Invalid username");
+        }
+        // B4. Check email exist or not exist
+        user = await UserModel.findOneByUsername({ username: identify });
+      }
+
+      // If account not exist
+      if (!user) {
+        throw new Error("Account not exist");
+      }
+
+      if (user.role_name === authConstants.Role.User) {
+        throw new Error("You are not admin");
+      }
+
+      // B5. Check Compare password
+      const comparePassword = PasswordUtils.compare({
+        password,
+        hash: user.password,
+      });
+
+      // If user enter password incorrect
+      if (!comparePassword) {
+        throw new Error("Password is incorrect");
+      }
+
+      // Update last login
+      await UserModel.updateUser({
+        user_id: user.user_id,
+        last_login: new Date(),
+      });
+      // B2. Get latest user info (without role if you separate it in SQL or manually)
+      const updatedUser = await UserModel.getUser({ user_id: user.user_id });
+
+      // B3. Remove role from cache data before saving (just user fields)
+      const { role_id, role_name, permissions, ...userCacheData } = updatedUser; // destructure to exclude role
+
+      // B4. Flatten user object and update cache
+      const flatUser = Object.entries(userCacheData).flat();
+      await redisDB.executeCommand("hset", `user:${user.user_id}`, ...flatUser);
+
+      // If user enter password correct
+      // B6. Create token
+      const accessToken = TokenUtil.generateAccessToken({
+        payload: {
+          userId: user.user_id,
+          email: user.email,
+          role: user.role_name,
+          roleId: user.role_id,
+        },
+        secret: tokenConfig.AccessSecret,
+      });
+
+      const refreshToken = TokenUtil.generateRefreshToken({
+        payload: {
+          userId: user.user_id,
+          email: user.email,
+          role: user.role_name,
+          roleId: user.role_id,
+        },
+        secret: tokenConfig.RefreshSecret,
+      });
+
+      res.cookie(authConstants.KeyCookie.RefreshToken, refreshToken, {
+        httpOnly: true,
+        secure: true, // Bắt buộc nếu dùng SameSite=None
+        sameSite: "none", // Cho phép cross-site
+        domain: "localhost", // Thay bằng domain của bạn (hoặc "localhost" cho dev)
+        maxAge: 7 * 24 * 60 * 60 * 1000,
+      });
+      return {
+        message: "Login successfully",
+        accessToken: accessToken,
+        user_id: user.user_id,
+        role: user.role_name,
+      };
+    } else if (Number(type) === authConstants.Type.Social) {
+      const email = identify;
+
+      // B2. Check validate email
+      const checkEmail = AuthValidate.isEmailValid(email);
+      if (!checkEmail) {
+        throw new Error("Invalid email");
+      }
+
+      // B3. Check email exist or not exist
+      let user = await UserModel.findOneByEmail({ email });
+
+      // If account not exist
+      if (!user) {
+        throw new Error("Account not exist");
+      }
+
+      if (user.role_name === authConstants.Role.User) {
+        throw new Error("You are not admin");
+      }
+
+      // B2. Get latest user info (without role if you separate it in SQL or manually)
+      const updatedUser = await UserModel.getUser({ user_id: user.user_id });
+
+      // B3. Remove role from cache data before saving (just user fields)
+      const { role_id, role_name, permissions, ...userCacheData } = updatedUser; // destructure to exclude role
+
+      // B4. Flatten user object and update cache
+      const flatUser = Object.entries(userCacheData).flat();
+      await redisDB.executeCommand("hset", `user:${user.user_id}`, ...flatUser);
+
+      // B4. Create token
+      const accessToken = TokenUtil.generateAccessToken({
+        payload: {
+          userId: user.user_id,
+          email: user.email,
+        },
+        secret: tokenConfig.AccessSecret,
+      });
+
+      const refreshToken = TokenUtil.generateRefreshToken({
+        payload: {
+          userId: user.user_id,
+          email: user.email,
+        },
+        secret: tokenConfig.RefreshSecret,
+      });
+
+      res.cookie(authConstants.KeyCookie.RefreshToken, refreshToken, {
+        httpOnly: true,
+        secure: true, // Bắt buộc nếu dùng SameSite=None
+        sameSite: "none", // Cho phép cross-site
+        domain: "localhost", // Thay bằng domain của bạn (hoặc "localhost" cho dev)
+        maxAge: 7 * 24 * 60 * 60 * 1000,
+      });
+
+      return {
+        message: "Login social successfully",
+        accessToken: accessToken,
+        user_id: user.user_id,
+        role: user.role_name,
+      };
+    } else {
+      throw new Error("Invalid type login");
+    }
+  }
+
   async logout(res) {
     res.clearCookie(authConstants.KeyCookie.RefreshToken);
     return {
@@ -251,6 +414,16 @@ class AuthService {
       user = newUser;
     }
 
+    // B2. Get latest user info (without role if you separate it in SQL or manually)
+    const updatedUser = await UserModel.getUser({ user_id: user.user_id });
+
+    // B3. Remove role from cache data before saving (just user fields)
+    const { role_id, role_name, permissions, ...userCacheData } = updatedUser; // destructure to exclude role
+
+    // B4. Flatten user object and update cache
+    const flatUser = Object.entries(userCacheData).flat();
+    await redisDB.executeCommand("hset", `user:${user.user_id}`, ...flatUser);
+
     // B4. Create token
     const accessToken = TokenUtil.generateAccessToken({
       payload: {
@@ -270,8 +443,10 @@ class AuthService {
 
     res.cookie(authConstants.KeyCookie.RefreshToken, refreshToken, {
       httpOnly: true,
-      secure: false,
-      sameSite: "none",
+      secure: true, // Bắt buộc nếu dùng SameSite=None
+      sameSite: "none", // Cho phép cross-site
+      domain: "localhost", // Thay bằng domain của bạn (hoặc "localhost" cho dev)
+      maxAge: 7 * 24 * 60 * 60 * 1000,
     });
 
     return {

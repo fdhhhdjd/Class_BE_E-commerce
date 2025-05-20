@@ -1,0 +1,8 @@
+CREATE TABLE otp_codes (
+    id SERIAL PRIMARY KEY,
+    user_id INTEGER NOT NULL,
+    otp_code VARCHAR(10) NOT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    expires_at TIMESTAMP NOT NULL,
+    is_used BOOLEAN DEFAULT FALSE
+);

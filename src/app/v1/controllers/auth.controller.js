@@ -23,6 +23,17 @@ class AuthController {
     }
   }
 
+  async loginAdmin(req, res) {
+    try {
+      const result = await authService.loginAdmin(req.body, res);
+      return res.status(200).json(result);
+    } catch (err) {
+      return res.status(500).send({
+        message: err.message,
+      });
+    }
+  }
+
   async loginGoogle(req, res) {
     try {
       const result = await authService.loginGoogle(req.body, res);
