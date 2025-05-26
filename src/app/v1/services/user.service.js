@@ -97,6 +97,33 @@ class UserService {
       message: "Password updated successfully",
     };
   }
+
+  async updatePhone(req) {
+    // B1. Get data from body
+    const { phone } = req.body;
+
+    // B2. Get userId from token
+    const { userId } = req.infoUserByToken;
+
+    // B3. Check user existence
+    const user = await userModel.getUser({ user_id: userId });
+    if (!user) throw new Error("User not found");
+
+    // B4. Update database (chỉ cập nhật các trường có trong data)
+    await userModel.updateUser({ user_id: userId, phone_number: phone });
+
+    // B5. Update Redis cache
+    await redisDB.executeCommand(
+      "hset",
+      `user:${userId}`,
+      "phone_number",
+      phone
+    );
+
+    return {
+      message: "Phone updated successfully",
+    };
+  }
 }
 
 module.exports = new UserService();

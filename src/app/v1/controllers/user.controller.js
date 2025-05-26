@@ -161,6 +161,19 @@ class UserController {
       });
     }
   }
+
+  async updatePhone(req, res) {
+    try {
+      await userService.updatePhone(req);
+      return res.status(200).send({
+        message: "Phone number updated successfully",
+      });
+    } catch (err) {
+      return res.status(500).send({
+        message: err.message,
+      });
+    }
+  }
 }
 
 module.exports = new UserController();

@@ -12,7 +12,7 @@ router.use(AuthMiddleware.checkToken);
 router.get("/profile", UserController.getUser);
 router.post("/update", UserController.updateUser);
 router.post("/update-password", UserController.updatePassword);
-
+router.post("/update-phone", UserController.updatePhone);
 //* User Roles
 // router.get(
 //   "/:userId/roles",

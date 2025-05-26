@@ -50,10 +50,3 @@ cron.schedule("0 0 * * *", async () => {
   );
   await runCronJob();
 });
-
-cron.schedule("0 0 * * *", async () => {
-  console.log(
-    "Running cron job every 1 minute to mark expired OTP codes as used..."
-  );
-  await runCronJob();
-});

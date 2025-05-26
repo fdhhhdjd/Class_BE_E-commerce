@@ -20,3 +20,6 @@ CREATE INDEX idx_users_phone ON users (phone_number);
 CREATE INDEX idx_users_is_blocked ON users(is_blocked);
 CREATE INDEX idx_users_is_deleted ON users(is_deleted);
 CREATE INDEX idx_users_username ON users(username);
+
+ALTER TABLE users
+	ADD CONSTRAINT unique_phone_number UNIQUE (phone_number);
