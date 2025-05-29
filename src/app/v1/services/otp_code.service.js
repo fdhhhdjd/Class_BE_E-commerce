@@ -112,7 +112,7 @@ class OTPCodeService {
       await redisDB.executeCommand("set", blockKey, 1, "EX", 1800); // Khóa 30 phút
       return {
         allowed: false,
-        message: "Tài khoản bị khóa 30 phút do gửi quá nhiều OTP.",
+        message: "Tài khoản bị khóa 30 phút do gửi quá nhiều OTP!",
       };
     }
   }
