@@ -23,3 +23,6 @@ CREATE INDEX idx_users_username ON users(username);
 
 ALTER TABLE users
 	ADD CONSTRAINT unique_phone_number UNIQUE (phone_number);
+
+ALTER TABLE users
+    ADD COLUMN is_active BOOLEAN DEFAULT TRUE;

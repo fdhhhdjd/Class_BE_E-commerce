@@ -12,6 +12,28 @@ class AuthController {
     }
   }
 
+  async NewRegister(req, res) {
+    try {
+      const result = await authService.newRegister(req.body);
+      return res.status(200).json(result);
+    } catch (err) {
+      return res.status(500).send({
+        message: err.message,
+      });
+    }
+  }
+
+  async verifyEmail(req, res) {
+    try {
+      const result = await authService.verifyEmail(req.params, res);
+      return res.status(200).json(result);
+    } catch (err) {
+      return res.status(500).send({
+        message: err.message,
+      });
+    }
+  }
+
   async login(req, res) {
     try {
       const result = await authService.login(req.body, res);

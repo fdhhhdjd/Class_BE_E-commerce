@@ -1,5 +1,6 @@
 const jwt = require("jsonwebtoken");
 const authConstants = require("../constants/auth.constants");
+const crypto = require("crypto");
 
 class TokenUtil {
   static generateAccessToken({
@@ -27,6 +28,10 @@ class TokenUtil {
       return token.replace("Bearer ", "");
     }
     return token;
+  }
+
+  static randomToken(length = 20) {
+    return crypto.randomBytes(length).toString("hex");
   }
 }
 

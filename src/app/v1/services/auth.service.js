@@ -7,6 +7,8 @@ const AuthValidate = require("../../share/validates/auth.validate");
 const UserModel = require("../models/user.model");
 const passport = require("../../share/utils/passport.util");
 const redisDB = require("../../share/database/redis.database");
+const TimeUtil = require("../../share/utils/time.util");
+const EmailVerificationTokenModel = require("../models/email_verification_token.model");
 class AuthService {
   async register(body) {
     // B1 Get data from body
@@ -44,6 +46,142 @@ class AuthService {
         email: newUser.email,
       },
       message: "User registered successfully",
+    };
+  }
+
+  async newRegister(body) {
+    const { email, password } = body;
+
+    // B2. Check validate email and password
+    if (!email || !password) {
+      throw new Error("Email and password are required");
+    }
+
+    const checkEmail = AuthValidate.isEmailValid(email);
+
+    if (!checkEmail) {
+      throw new Error("Invalid email");
+    }
+
+    // B3. Check email exist or not exist
+    const user = await UserModel.findOneByEmail({ email });
+
+    // B4. If account exist
+    if (user) {
+      throw new Error("Email already exist");
+    }
+
+    const hashPassword = PasswordUtils.hash({ password });
+    const token = TokenUtil.randomToken();
+    const expires = TimeUtil.createDateTimeWithOffset(30); // Token hết hạn sau 30 phút
+
+    const newUser = await UserModel.newCreate({
+      email,
+      password: hashPassword,
+      is_active: false,
+    });
+
+    const LinkVerifyEmail = `http://localhost:5001/api/auth/verify-email/${token}/${email}/${
+      newUser.user_id
+    }/${expires.getTime()}`;
+
+    await EmailVerificationTokenModel.createToken({
+      userId: newUser.user_id,
+      token,
+      expiresAt: expires,
+    });
+
+    // B7. Send email verification
+    // EmailUtil.sendEmail({
+    //   to: email,
+    //   subject: "Verify Your Email",
+    //   text: `Hello ${email},\n\nPlease verify your email by clicking the link below:\n\n${LinkVerifyEmail}\n\nThis link will expire in 30 minutes.\n\nBest regards,\nClass02`,
+    //   html: `<p>Hello ${email},</p><p>Please verify your email by clicking the link below:</p><p><a href="${LinkVerifyEmail}">Verify Email</a></p><p>This link will expire in 30 minutes.</p><p>Best regards,<br>Class O2</p>`,
+    // });
+
+    return {
+      user: {
+        userId: newUser.user_id,
+        email: newUser.email,
+      },
+      linkVerifyEmail: LinkVerifyEmail,
+      message:
+        "User registered successfully. Please check your email to verify your account.",
+    };
+  }
+
+  async verifyEmail(data, res) {
+    const { token, email, userId, expires } = data;
+
+    if (!token || !email || !userId || !expires) {
+      throw new Error("Invalid token or email or userId or expires");
+    }
+
+    // B2. Check token expire
+    const currentTime = new Date().getTime();
+    if (currentTime > expires) {
+      throw new Error("Token expired");
+    }
+
+    const checkToken = await EmailVerificationTokenModel.getTokenByUserId({
+      userId,
+      token,
+    });
+
+    // B3. If token not exist or used
+    if (!checkToken || checkToken.used) {
+      throw new Error("Token not exist or used");
+    }
+
+    // B3. Get user by email
+    const user = await UserModel.findOneByEmailNotIsActive({ email });
+
+    // If user not exist
+    if (!user) {
+      throw new Error("User not exist");
+    }
+
+    await Promise.all([
+      EmailVerificationTokenModel.updateToken({
+        used: true,
+        token,
+      }),
+      UserModel.updateUser({ user_id: userId, is_active: true }),
+    ]);
+
+    const accessToken = TokenUtil.generateAccessToken({
+      payload: {
+        userId: user.user_id,
+        email: user.email,
+        role: user.role_name,
+        roleId: user.role_id,
+      },
+      secret: tokenConfig.AccessSecret,
+    });
+
+    const refreshToken = TokenUtil.generateRefreshToken({
+      payload: {
+        userId: user.user_id,
+        email: user.email,
+        role: user.role_name,
+        roleId: user.role_id,
+      },
+      secret: tokenConfig.RefreshSecret,
+    });
+
+    res.cookie(authConstants.KeyCookie.RefreshToken, refreshToken, {
+      httpOnly: true,
+      secure: true, // Bắt buộc nếu dùng SameSite=None
+      sameSite: "none", // Cho phép cross-site
+      domain: "localhost", // Thay bằng domain của bạn (hoặc "localhost" cho dev)
+      maxAge: 7 * 24 * 60 * 60 * 1000,
+    });
+
+    return {
+      message: "Email verified successfully",
+      accessToken: accessToken,
+      user_id: user.user_id,
+      role: user.role_name,
     };
   }
 

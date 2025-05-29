@@ -13,6 +13,18 @@ class UserModel {
     }
   }
 
+  async newCreate({ email, password, is_active }) {
+    try {
+      const query =
+        "INSERT INTO users (email, password, is_active) VALUES ($1, $2, $3) RETURNING *";
+      const values = [email, password, is_active];
+      const { rows } = await pgDatabase.query(query, values);
+      return rows[0];
+    } catch (error) {
+      console.log("UserModel -> create -> error", error);
+    }
+  }
+
   async getRoleWithPermissionsByUserId(user_id) {
     const query = `
       SELECT 
@@ -48,6 +60,19 @@ class UserModel {
     }
   }
 
+  async findOneByEmailNotIsActive({ email }) {
+    try {
+      const query = `
+        SELECT * FROM users WHERE email = $1 AND is_deleted = false AND is_active = false
+      `;
+      const values = [email];
+      const { rows } = await pgDatabase.query(query, values);
+      return rows[0];
+    } catch (error) {
+      console.log("UserModel -> findOneByEmailNotIsActive -> error", error);
+    }
+  }
+
   async findOneByEmail({ email }) {
     try {
       const query = `
@@ -55,7 +80,7 @@ class UserModel {
       FROM users u
       LEFT JOIN user_roles ur ON u.user_id = ur.user_id
       LEFT JOIN roles r ON ur.role_id = r.role_id
-      WHERE u.email = $1 AND u.is_deleted = false
+      WHERE u.email = $1 AND u.is_deleted = false AND u.is_active = true
     `;
       const values = [email];
       const { rows } = await pgDatabase.query(query, values);
@@ -72,7 +97,7 @@ class UserModel {
         FROM users u
         LEFT JOIN user_roles ur ON u.user_id = ur.user_id
         LEFT JOIN roles r ON ur.role_id = r.role_id
-        WHERE u.username = $1 AND u.is_deleted = false
+        WHERE u.username = $1 AND u.is_deleted = false AND u.is_active = true
       `;
       const values = [username];
       const { rows } = await pgDatabase.query(query, values);
