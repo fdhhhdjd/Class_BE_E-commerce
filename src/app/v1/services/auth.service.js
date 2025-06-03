@@ -9,6 +9,7 @@ const passport = require("../../share/utils/passport.util");
 const redisDB = require("../../share/database/redis.database");
 const TimeUtil = require("../../share/utils/time.util");
 const EmailVerificationTokenModel = require("../models/email_verification_token.model");
+const appConfig = require("../../share/configs/app.conf");
 class AuthService {
   async register(body) {
     // B1 Get data from body
@@ -81,7 +82,13 @@ class AuthService {
       is_active: false,
     });
 
-    const LinkVerifyEmail = `http://localhost:5001/api/auth/verify-email/${token}/${email}/${
+    const host =
+      appConfig.NodeEnv === "development" ? "localhost" : "103.82.194.165";
+
+    const port =
+      appConfig.NodeEnv === "development" ? appConfig.Port : appConfig.PortFe;
+
+    const LinkVerifyEmail = `http://${host}:${port}/api/auth/verify-email/${token}/${email}/${
       newUser.user_id
     }/${expires.getTime()}`;
 
