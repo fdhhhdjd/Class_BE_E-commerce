@@ -92,12 +92,12 @@ class AuthService {
     });
 
     // B7. Send email verification
-    // EmailUtil.sendEmail({
-    //   to: email,
-    //   subject: "Verify Your Email",
-    //   text: `Hello ${email},\n\nPlease verify your email by clicking the link below:\n\n${LinkVerifyEmail}\n\nThis link will expire in 30 minutes.\n\nBest regards,\nClass02`,
-    //   html: `<p>Hello ${email},</p><p>Please verify your email by clicking the link below:</p><p><a href="${LinkVerifyEmail}">Verify Email</a></p><p>This link will expire in 30 minutes.</p><p>Best regards,<br>Class O2</p>`,
-    // });
+    EmailUtil.sendEmail({
+      to: email,
+      subject: "Verify Your Email",
+      text: `Hello ${email},\n\nPlease verify your email by clicking the link below:\n\n${LinkVerifyEmail}\n\nThis link will expire in 30 minutes.\n\nBest regards,\nClass02`,
+      html: `<p>Hello ${email},</p><p>Please verify your email by clicking the link below:</p><p><a href="${LinkVerifyEmail}">Verify Email</a></p><p>This link will expire in 30 minutes.</p><p>Best regards,<br>Class O2</p>`,
+    });
 
     return {
       user: {
