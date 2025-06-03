@@ -590,6 +590,8 @@ class AuthService {
     return {
       message: "Login Google successfully",
       accessToken: accessToken,
+      user_id: user.user_id,
+      role: user.role_name,
     };
   }
 
