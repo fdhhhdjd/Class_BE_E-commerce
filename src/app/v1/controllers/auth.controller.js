@@ -34,6 +34,17 @@ class AuthController {
     }
   }
 
+  async resendVerifyEmail(req, res) {
+    try {
+      const result = await authService.resendVerifyEmail(req.params);
+      return res.status(200).json(result);
+    } catch (err) {
+      return res.status(500).send({
+        message: err.message,
+      });
+    }
+  }
+
   async login(req, res) {
     try {
       const result = await authService.login(req.body, res);

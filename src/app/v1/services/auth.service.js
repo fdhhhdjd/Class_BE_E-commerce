@@ -83,12 +83,12 @@ class AuthService {
     });
 
     const host =
-      appConfig.NodeEnv === "development" ? "localhost" : "103.82.194.165";
+      appConfig.NodeEnv === "development" ? "localhost" : "localhost";
 
     const port =
       appConfig.NodeEnv === "development" ? appConfig.Port : appConfig.PortFe;
 
-    const LinkVerifyEmail = `http://${host}:${port}/api/auth/verify-email/${token}/${email}/${
+    const LinkVerifyEmail = `http://${host}:${port}/auth/api/auth/verify-email/${token}/${email}/${
       newUser.user_id
     }/${expires.getTime()}`;
 
@@ -189,6 +189,70 @@ class AuthService {
       accessToken: accessToken,
       user_id: user.user_id,
       role: user.role_name,
+    };
+  }
+
+  async resendVerifyEmail(data) {
+    const { email, expired } = data;
+
+    if (!expired || !email) {
+      throw new Error("Email and password are required");
+    }
+
+    const currentTime = new Date().getTime();
+    if (currentTime < expired) {
+      throw new Error("You can only resend email after 30 minutes");
+    }
+
+    const checkEmail = AuthValidate.isEmailValid(email);
+
+    if (!checkEmail) {
+      throw new Error("Invalid email");
+    }
+
+    // B3. Check email exist or not exist
+    const user = await UserModel.findOneByEmailToResend(email);
+
+    // B4. If account exist
+    if (!user) {
+      throw new Error("Please register first");
+    }
+
+    const token = TokenUtil.randomToken();
+    const expires = TimeUtil.createDateTimeWithOffset(30); // Token hết hạn sau 30 phút
+
+    const host =
+      appConfig.NodeEnv === "development" ? "localhost" : "localhost";
+
+    const port =
+      appConfig.NodeEnv === "development" ? appConfig.Port : appConfig.PortFe;
+
+    const LinkVerifyEmail = `http://${host}:${port}/auth/api/auth/verify-email/${token}/${email}/${
+      user.user_id
+    }/${expires.getTime()}`;
+
+    await EmailVerificationTokenModel.createToken({
+      userId: user.user_id,
+      token,
+      expiresAt: expires,
+    });
+
+    // B7. Send email verification
+    EmailUtil.sendEmail({
+      to: email,
+      subject: "Verify Your Email",
+      text: `Hello ${email},\n\nPlease verify your email by clicking the link below:\n\n${LinkVerifyEmail}\n\nThis link will expire in 30 minutes.\n\nBest regards,\nClass02`,
+      html: `<p>Hello ${email},</p><p>Please verify your email by clicking the link below:</p><p><a href="${LinkVerifyEmail}">Verify Email</a></p><p>This link will expire in 30 minutes.</p><p>Best regards,<br>Class O2</p>`,
+    });
+
+    return {
+      user: {
+        userId: user.user_id,
+        email: user.email,
+      },
+      linkVerifyEmail: LinkVerifyEmail,
+      message:
+        "Registration email resent successfully. Please check your email to verify your account.",
     };
   }
 

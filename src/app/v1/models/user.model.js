@@ -90,6 +90,19 @@ class UserModel {
     }
   }
 
+  async findOneByEmailToResend(email) {
+    try {
+      const query = `
+        SELECT * FROM users WHERE email = $1 AND is_deleted = false AND is_active = false
+      `;
+      const values = [email];
+      const { rows } = await pgDatabase.query(query, values);
+      return rows[0];
+    } catch (error) {
+      console.log("UserModel -> findOneByEmailToResend -> error", error);
+    }
+  }
+
   async findOneByUsername({ username }) {
     try {
       const query = `

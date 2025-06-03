@@ -12,6 +12,10 @@ router.get(
   "/verify-email/:token/:email/:userId/:expires",
   AuthController.verifyEmail
 );
+router.get(
+  "/resend-verify-email/:email/:expired",
+  AuthController.resendVerifyEmail
+);
 
 router.post("/login", AuthController.login);
 router.post("/login-google", AuthController.loginGoogle);
