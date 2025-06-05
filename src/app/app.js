@@ -27,6 +27,7 @@ app.use(passport.session());
 
 require("./share/database/pg.database").connect();
 require("./share/database/redis.database").connect();
+// require("./share/database/firebase.cloud").testConnection();
 
 // Passport Google OAuth
 app.get(
