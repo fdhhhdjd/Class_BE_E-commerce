@@ -26,6 +26,10 @@ services:
     environment:
       - REDIS_PASSWORD=${REDIS_PASSWORD}
     command: ["redis-server", "--requirepass", "${REDIS_PASSWORD}"]
+    volumes:
+      - redisdata:/data
 
 volumes:
   pgdata: # Khai báo volume ở đây
+  redisdata: # Khai báo volume ở đây
+

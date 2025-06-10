@@ -23,6 +23,23 @@ class DeviceModel {
       throw error;
     }
   }
+
+  static async getUserDevices(userId) {
+    const query = `
+      SELECT device_token FROM device
+      WHERE user_id = $1 AND is_active = true
+    `;
+
+    const values = [userId];
+
+    try {
+      const result = await pgDatabase.query(query, values);
+      return result.rows;
+    } catch (error) {
+      console.error("Error in getUserDevices:", error);
+      throw error;
+    }
+  }
 }
 
 module.exports = DeviceModel;
