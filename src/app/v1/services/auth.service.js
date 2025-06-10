@@ -10,6 +10,7 @@ const redisDB = require("../../share/database/redis.database");
 const TimeUtil = require("../../share/utils/time.util");
 const EmailVerificationTokenModel = require("../models/email_verification_token.model");
 const appConfig = require("../../share/configs/app.conf");
+const deviceService = require("./device.service");
 class AuthService {
   async register(body) {
     // B1 Get data from body
@@ -256,7 +257,7 @@ class AuthService {
     };
   }
 
-  async login(body, res) {
+  async login(body, res, deviceId) {
     // B1 Get data from body
     const { identify, password } = body;
 
@@ -342,15 +343,20 @@ class AuthService {
       maxAge: 7 * 24 * 60 * 60 * 1000,
     });
 
+    const device = await deviceService.upsertDevice(user.user_id, deviceId, {
+      platform: "web",
+    });
+
     return {
       message: "Login successfully",
       accessToken: accessToken,
       user_id: user.user_id,
       role: user.role_name,
+      deviceToken: device.device_token,
     };
   }
 
-  async loginAdmin(body, res) {
+  async loginAdmin(body, res, deviceId) {
     // B1 Get data from body
     const { identify, password, type } = body;
 
@@ -440,11 +446,17 @@ class AuthService {
         domain: "localhost", // Thay bằng domain của bạn (hoặc "localhost" cho dev)
         maxAge: 7 * 24 * 60 * 60 * 1000,
       });
+
+      const device = await deviceService.upsertDevice(user.user_id, deviceId, {
+        platform: "web",
+      });
+
       return {
         message: "Login successfully",
         accessToken: accessToken,
         user_id: user.user_id,
         role: user.role_name,
+        deviceToken: device.device_token,
       };
     } else if (Number(type) === authConstants.Type.Social) {
       const email = identify;
@@ -576,13 +588,16 @@ class AuthService {
       secret: tokenConfig.AccessSecret,
     });
 
+    const device = await deviceService.upsertDevice(userId, req.deviceId, {});
+
     return {
       message: "Renew token successfully",
       accessToken,
+      deviceToken: device.device_token,
     };
   }
 
-  async loginGoogle(body, res) {
+  async loginGoogle(body, res, deviceId) {
     // B1 Get data from body
     const { email } = body;
 
@@ -658,11 +673,14 @@ class AuthService {
       maxAge: 7 * 24 * 60 * 60 * 1000,
     });
 
+    const device = await deviceService.upsertDevice(user.user_id, deviceId, {});
+
     return {
       message: "Login Google successfully",
       accessToken: accessToken,
       user_id: user.user_id,
       role: user.role_name,
+      deviceToken: device.device_token,
     };
   }
 

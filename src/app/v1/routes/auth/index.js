@@ -2,8 +2,12 @@ const express = require("express");
 const AuthController = require("../../controllers/auth.controller");
 const AuthMiddleware = require("../../middlewares/auth.middleware");
 const passport = require("../../../share/utils/passport.util");
+const HeaderMiddleware = require("../../middlewares/header.middleware");
 
 const router = express.Router();
+
+// Device Middleware
+router.use(HeaderMiddleware.getDeviceId);
 
 // --- Users
 router.post("/register", AuthController.register);

@@ -47,7 +47,7 @@ class AuthController {
 
   async login(req, res) {
     try {
-      const result = await authService.login(req.body, res);
+      const result = await authService.login(req.body, res, req.deviceId);
       return res.status(200).json(result);
     } catch (err) {
       return res.status(500).send({
@@ -58,7 +58,7 @@ class AuthController {
 
   async loginAdmin(req, res) {
     try {
-      const result = await authService.loginAdmin(req.body, res);
+      const result = await authService.loginAdmin(req.body, res, req.deviceId);
       return res.status(200).json(result);
     } catch (err) {
       return res.status(500).send({
@@ -69,7 +69,7 @@ class AuthController {
 
   async loginGoogle(req, res) {
     try {
-      const result = await authService.loginGoogle(req.body, res);
+      const result = await authService.loginGoogle(req.body, res, req.deviceId);
       return res.status(200).json(result);
     } catch (err) {
       return res.status(500).send({
