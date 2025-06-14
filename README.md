@@ -23,7 +23,7 @@
 
 ## Description
 
-This source code open source for everybody refer,only clone and run :D
+This source code is open source for everybody refer to,only clone and run :D
 
 ## System Design
 
